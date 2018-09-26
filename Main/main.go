@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "svn.cloudserver.ru/Rendall_server/fastJSON"
+	"../Config"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"flag"
 	"math/rand"
 	"time"
+	"database/sql"
 )
 
 type (
@@ -27,9 +29,10 @@ type (
 )
 
 var (
-	addr = flag.String("addr", "192.168.10.185:9011", "localhost")
+	addr *string
 	chars = []rune("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789")
 	socketCounter = 0
+	db *sql.DB
 	charsLen = len(chars)
 	seededRand *rand.Rand
 	sessionIdLen = 30
@@ -105,6 +108,22 @@ func main() {
 	wsConnections.list = make(map[int]*connection)
 	log.Println("start init ws server")
 	initRand()
+
+	log.Println("init db connection")
+	db, err := Config.ReadDatabaseConfig("../Config/database.json")
+	if err != nil {
+		log.Println("error in init db connection:", err, db)
+	}
+	log.Println("Success db connection, db:", db)
+
+	var server Config.Server
+	server, err = Config.ReadServerConfig("../Config/server.json")
+	if err != nil {
+		log.Println("error in parse server config:", err, server)
+	}
+	value := server.Ip + ":" + server.Port
+	addr = flag.String("addr", value, "localhost")
+
  	http.HandleFunc("/", handler)
 	log.Println("start server on addr:", *addr)
 	log.Fatal(http.ListenAndServe(*addr,nil))
