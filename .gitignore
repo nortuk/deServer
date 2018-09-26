@@ -1,1 +1,4 @@
 .idea
+/Config/database.json
+/Config/server.json
+*.exe
