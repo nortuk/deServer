@@ -1,16 +1,13 @@
-package handler
+package server
 
 import (
-//	"svn.cloudserver.ru/Rendall_server/fastJSON"
-	"database/sql"
 	"math/rand"
-	"../Config"
 	"sync"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"database/sql"
+	"../Database"
 	"log"
-	"time"
-	"flag"
 )
 
 type (
@@ -49,6 +46,27 @@ var (
 		},
 	}
 )
+
+func Start(servCfgPath string, dbCfgPath string) (err error) {
+	err = database.InitializeDBWork(dbCfgPath)
+	if err != nil {
+		log.Print("Error in database initialization:", err)
+		return
+	}
+
+	/*
+	cfg, err := config.LoadServCfg(servCfgPath)
+	if err != nil {
+		return
+	}
+	*/
+
+	return nil
+
+}
+
+
+/*
 
 func initRand() {
 	seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -105,7 +123,6 @@ func messageReader(conn *Connection) {
 			log.Println("Get text msg")
 			// ниже пример работы с fastJSON парсером.
 			// инициализация
-			/*
 			p := fastjson.Parser{}
 			// получение *fastJSON.Value
 			value, err := p.Parse(string(msg))
@@ -119,7 +136,6 @@ func messageReader(conn *Connection) {
 			str := value.GetStringBytes("key")
 			log.Println(string(str))
 			// TODO parse messages from client
-			*/
 		case websocket.CloseMessage:
 			log.Println("Closing connection")
 			// delete conn
@@ -145,3 +161,4 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	messageReader(&user)
 }
 
+*/

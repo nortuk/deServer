@@ -1,14 +1,15 @@
 package main
 
 import (
-	_ "svn.cloudserver.ru/Rendall_server/fastJSON"
-	"time"
-	_ "../Handlers"
+	"../Server"
+	"log"
 )
 
 func main() {
-	for {
-		time.Sleep(1000 * time.Second)
+	err := server.Start("server.json","database.json")
+	if err != nil {
+		log.Print("Error in server initialization:", err)
 	}
+
 	return
 }
