@@ -1,14 +1,71 @@
 package server
 
 import (
-	"math/rand"
-	"sync"
-	"github.com/gorilla/websocket"
-	"net/http"
-	"database/sql"
 	"../Database"
 	"log"
+	"../Config"
+	"github.com/gorilla/websocket"
+	"net/http"
+	"flag"
 )
+
+var (
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true //чтоб разрешить кроссдоменные запросы
+		},
+	}
+
+	cfg config.ServCfg
+)
+
+func Start(servCfgPath string, dbCfgPath string) (err error) {
+	err = database.InitializeDBWork(dbCfgPath)
+	if err != nil {
+		log.Println("Error in database initialization:", err)
+		return err
+	}
+	
+	cfg, err = config.LoadServCfg(servCfgPath)
+	if err != nil {
+		return err
+	}
+	
+	listening()
+	
+	return nil
+}
+
+func listening()  {
+	http.HandleFunc("/", handler)
+	log.Println("Server started")
+	value := cfg.Ip + ":" + cfg.Port
+	addr := flag.String("addr", value, "localhost")
+	log.Fatal(http.ListenAndServe(*addr,nil))
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("Upgrade error", err)
+		return
+	}
+
+	for {
+		msgType, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("ReadMessage ERROR:", err)
+			return
+		}
+		log.Println("new msg:", string(msg), string(msgType))
+	}
+}
+
+
+
+/*
 
 type (
 	Connection struct {
@@ -47,24 +104,7 @@ var (
 	}
 )
 
-func Start(servCfgPath string, dbCfgPath string) (err error) {
-	err = database.InitializeDBWork(dbCfgPath)
-	if err != nil {
-		log.Print("Error in database initialization:", err)
-		return
-	}
-
-	/*
-	cfg, err := config.LoadServCfg(servCfgPath)
-	if err != nil {
-		return
-	}
-	*/
-
-	return nil
-
-}
-
+*/
 
 /*
 

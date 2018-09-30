@@ -5,6 +5,7 @@ import (
 	"log"
 	"fmt"
 	"database/sql"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -14,14 +15,14 @@ var (
 func InitializeDBWork(path string) (er error) {
 	var err error
 	cfg, err = config.LoadDBCfg(path)
-	if err != nill {
-		log.Print("Error in initialize database work:", err)
+	if err != nil {
+		log.Println("Error in initialize database work:", err)
 		return err
 	}
 
 	err = checkDBConnection()
 	if err != nil {
-		log.Print("Error in initialize database work:", err)
+		log.Println("Error in initialize database work:", err)
 		return err
 	}
 
