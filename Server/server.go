@@ -9,6 +9,17 @@ import (
 	"flag"
 )
 
+type (
+	staffInfo struct {
+		login string
+	}
+
+	visitorInfo struct {
+		imei string
+		table int
+	}
+)
+
 var (
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -19,6 +30,10 @@ var (
 	}
 
 	cfg config.ServCfg
+
+	staff = make(map[*websocket.Conn]staffInfo)
+	visitors = make(map[*websocket.Conn]visitorInfo)
+
 )
 
 func Start(servCfgPath string, dbCfgPath string) (err error) {
@@ -53,17 +68,75 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	listeningConnection(conn)
+}
+
+func listeningConnection(conn *websocket.Conn) {
 	for {
+		isOk, err := staffProcessing(conn)
+
+		if isOk {
+			continue
+		}
+		if err != nil {
+			log.Println("Staff processing error:", err)
+		}
+
+		isOk, err = visitorProcessing(conn)
+		if isOk {
+			continue
+		}
+		if err != nil {
+			log.Println("Visitor processing error:", err)
+		}
+
+		isOk, err = authProcessing(conn)
+		if isOk {
+			continue
+		}
+		if err != nil {
+			log.Println("Authentification error:", err)
+		}
+
+/*
 		msgType, msg, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("ReadMessage ERROR:", err)
+			log.Println("ReadMessage error:", err)
 			return
 		}
+
 		log.Println("new msg:", string(msg), string(msgType))
+
+		err = msgProcessing(conn, msgType, msg)
+		if err != nil {
+			log.Println("Error in message processing:", err)
+		}
+*/
 	}
 }
 
+func staffProcessing(conn *websocket.Conn) (isOk bool,err error) {
+	_, isOk = staff[conn]
+	if !isOk {
+		return false, nil
+	}
 
+	return true,nil
+}
+
+func visitorProcessing(conn *websocket.Conn) (isOk bool,err error) {
+	_, isOk = visitors[conn]
+	if !isOk {
+		return false,nil
+	}
+
+	return true,nil
+}
+
+func authProcessing(conn *websocket.Conn) (isOk bool, err error) {
+
+	return false,nil
+}
 
 /*
 
