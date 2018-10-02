@@ -39,11 +39,13 @@ func checkDBConnection() (err error)  {
 		return err
 	}
 
+	/*
 	err = db.Ping()
 	if err != nil {
 		log.Println("Error in ping database:", err)
 		return err
 	}
+	*/
 
 	return nil
 }
