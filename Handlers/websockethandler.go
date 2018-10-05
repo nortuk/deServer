@@ -1,7 +1,7 @@
 package handler
 
 import (
-//	"svn.cloudserver.ru/Rendall_server/fastJSON"
+	//"svn.cloudserver.ru/Rendall_server/fastJSON"
 	"database/sql"
 	"math/rand"
 	"../Config"

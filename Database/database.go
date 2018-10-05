@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"context"
 )
 
 var (
 	cfg config.DBCfg
+	connStr string
+	ctx = context.Background()
 )
 
 func InitializeDBWork(path string) (er error) {
@@ -20,6 +23,9 @@ func InitializeDBWork(path string) (er error) {
 		return err
 	}
 
+	connStr = fmt.Sprint("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable)",
+		cfg.User, cfg.Password, cfg.NameDatabase, cfg.Host, cfg.Port)
+
 	err = checkDBConnection()
 	if err != nil {
 		log.Println("Error in initialize database work:", err)
@@ -29,15 +35,14 @@ func InitializeDBWork(path string) (er error) {
 	return nil
 }
 
+
 func checkDBConnection() (err error)  {
-	connStr := fmt.Sprint("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable)",
-		cfg.User, cfg.Password, cfg.NameDatabase, cfg.Host, cfg.Port)
 	db, err := sql.Open(cfg.UsedDatabase, connStr)
-	defer db.Close()
 	if err != nil {
 		log.Println("Error in the open connection with database:", err)
 		return err
 	}
+	defer db.Close()
 
 	/*
 	err = db.Ping()
@@ -48,4 +53,26 @@ func checkDBConnection() (err error)  {
 	*/
 
 	return nil
+}
+
+
+func CheckStaff(login string, pass string) bool {
+
+	return true
+	/*
+	db, err := sql.Open(cfg.UsedDatabase, connStr)
+	if err != nil {
+		log.Println("Error in the open connection with database:", err)
+		return false
+	}
+	defer db.Close()
+
+	//rows, err := db.QueryContext(ctx, "SELECT * FROM staff WHERE login=")
+	if err != nil {
+		log.Println("Error in request execution", err)
+		return false
+	}
+	defer rows.Close()
+
+*/
 }
