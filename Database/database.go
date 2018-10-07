@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 	"context"
+	"errors"
 )
 
 var (
@@ -54,24 +55,23 @@ func checkDBConnection() (err error)  {
 }
 
 
-func CheckStaff(login string, pass string) bool {
+func GetStaffId(login string, pass string) (id int, err error) {
 	db, err := sql.Open(cfg.UsedDatabase, connStr)
 	if err != nil {
 		log.Println("Error in the open connection with database:", err)
-		return false
+		return 0, err
 	}
 	defer db.Close()
 
-	var count int
-	err = db.QueryRow(`SELECT COUNT(*) FROM staff WHERE login = $1 AND pass=$2`, login, pass).Scan(&count)
+	rows, err := db.Query(`SELECT ID FROM staff WHERE login = $1 AND pass=$2`, login, pass)
 	if err != nil {
 		log.Println("Error in request execution:", err)
-		return false
+		return 0,err
 	}
-
-	if count == 1 {
-		return true
+	var userID sql.NullInt64
+	if rows.Next() {
+		rows.Scan(&userID)
+		return int(userID.Int64), nil
 	}
-
-	return false
+	return 0,errors.New("Error: can't find this user")
 }

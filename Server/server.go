@@ -8,16 +8,25 @@ import (
 	"net/http"
 	"flag"
 	"svn.cloudserver.ru/fastJSON"
+	"errors"
 )
 
 type (
 	staffInfo struct {
+		id int
 		login string
 	}
 
 	visitorInfo struct {
 		imei string
 		table int
+	}
+
+	tableInfo struct {
+		id int
+		name string
+		visitors map[*websocket.Conn]visitorInfo
+		staff map[*websocket.Conn]staffInfo
 	}
 
 	personType int
@@ -128,4 +137,25 @@ func listeningConnection(conn *websocket.Conn) {
 			log.Println("Unknown type")
 		}
 	}
+}
+
+func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
+	msgType, msgBytes, err := conn.ReadMessage()
+	if(msgType == websocket.CloseMessage) {
+		log.Println("Connection closed")
+		msg,_ := parser.Parse("{}")
+		return msg, errors.New("Connection closed")
+	}
+	if err != nil {
+		msg,_ := parser.Parse("{}")
+		return msg, err
+	}
+
+	msg, parseErr := parser.Parse(string(msgBytes))
+	if parseErr != nil {
+		msg,_ := parser.Parse("{}")
+		return msg, nil
+	}
+
+	return msg, nil
 }

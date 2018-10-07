@@ -49,7 +49,6 @@ func sendAuthOk(conn *websocket.Conn) bool {
 	answer := response{
 		Command: "auth",
 		Status: true,
-		Data: dataStruct{},
 	}
 
 	jsonAnser, err := json.Marshal(answer)

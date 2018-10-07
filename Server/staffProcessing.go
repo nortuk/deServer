@@ -13,31 +13,56 @@ func appendStaff(conn *websocket.Conn, msg string) {
 		return
 	}
 
-	login := jsonMsg.GetString("login")
+	ok := jsonMsg.Exists("data")
+	if !ok {
+		log.Println("Error in visitor parse value don't exists")
+		return
+	}
+	data := jsonMsg.Get("data")
+
+	login := data.GetString("login")
 	if login == "" {
 		log.Println("Error in visitor parse value don't exists")
 		return
 	}
 
-	pass := jsonMsg.GetString("pass")
+	pass := data.GetString("pass")
 	if pass == "" {
 		log.Println("Error in visitor parse password uncorrect")
 		return
 	}
 
-	ok := database.CheckStaff(login, pass)
-	if !ok {
-		log.Println("Error uncorrect login or password")
+	id, err := database.GetStaffId(login, pass)
+	if err != nil {
+		log.Println("Error uncorrect login or password ", err)
 		return
 	}
 
 	staff[conn] = staffInfo{
+		id: id,
 		login: login,
 	}
 }
 
 func staffProcessing(conn *websocket.Conn) {
 	for {
-		return
+		msg, err := getMsg(conn)
+		if err != nil {
+			log.Println("Error in staff processing ", err)
+			return
+		}
+
+		command := msg.GetString("command")
+		switch command {
+		case "getTables":
+			getTables(conn)
+
+		default:
+			log.Println("Error: accept message with wrong structure")
+		}
 	}
+}
+
+func getTables(conn *websocket.Conn) {
+
 }
