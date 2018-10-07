@@ -27,12 +27,12 @@ func getPersonalType(msg string) (res personType) {
 }
 
 func  isStaff(jsonMsg *fastjson.Value) bool {
-	ok := jsonMsg.Exists("type")
+	ok := jsonMsg.Exists("command")
 	if !ok {
 		return false
 	}
 
-	if jsonMsg.GetString("type") == "auth" {
+	if jsonMsg.GetString("command") == "auth" {
 		return true
 	}
 

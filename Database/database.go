@@ -23,8 +23,8 @@ func InitializeDBWork(path string) (er error) {
 		return err
 	}
 
-	connStr = fmt.Sprint("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable)",
-		cfg.User, cfg.Password, cfg.NameDatabase, cfg.Host, cfg.Port)
+	connStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable",
+		cfg.Host, cfg.Port, cfg.User, cfg.NameDatabase)
 
 	err = checkDBConnection()
 	if err != nil {
@@ -44,22 +44,17 @@ func checkDBConnection() (err error)  {
 	}
 	defer db.Close()
 
-	/*
 	err = db.Ping()
 	if err != nil {
 		log.Println("Error in ping database:", err)
 		return err
 	}
-	*/
 
 	return nil
 }
 
 
 func CheckStaff(login string, pass string) bool {
-
-	return true
-	/*
 	db, err := sql.Open(cfg.UsedDatabase, connStr)
 	if err != nil {
 		log.Println("Error in the open connection with database:", err)
@@ -67,12 +62,16 @@ func CheckStaff(login string, pass string) bool {
 	}
 	defer db.Close()
 
-	//rows, err := db.QueryContext(ctx, "SELECT * FROM staff WHERE login=")
+	var count int
+	err = db.QueryRow(`SELECT COUNT(*) FROM staff WHERE login = $1 AND pass=$2`, login, pass).Scan(&count)
 	if err != nil {
-		log.Println("Error in request execution", err)
+		log.Println("Error in request execution:", err)
 		return false
 	}
-	defer rows.Close()
 
-*/
+	if count == 1 {
+		return true
+	}
+
+	return false
 }

@@ -99,6 +99,7 @@ func listeningConnection(conn *websocket.Conn) {
 		switch personalType {
 
 		case isVisitorType:
+			/*
 			appendVisitor(conn,string(msg))
 			_, ok := visitors[conn]
 			if !ok {
@@ -107,6 +108,7 @@ func listeningConnection(conn *websocket.Conn) {
 			}
 
 			visitorProcessing(conn)
+			*/
 			return
 
 		case isStaffType:
@@ -114,8 +116,13 @@ func listeningConnection(conn *websocket.Conn) {
 			_, ok := staff[conn]
 			if !ok {
 				log.Println("Error in parsing personal info")
+				sendError(conn,"auth","Don't accept staff")
 				continue
 			}
+			sendAuthOk(conn)
+			staffProcessing(conn)
+
+			return
 
 		case unknownType:
 			log.Println("Unknown type")

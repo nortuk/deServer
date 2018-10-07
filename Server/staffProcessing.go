@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/gorilla/websocket"
 	"log"
+	"../Database"
 )
 
 func appendStaff(conn *websocket.Conn, msg string) {
@@ -12,26 +13,19 @@ func appendStaff(conn *websocket.Conn, msg string) {
 		return
 	}
 
-	ok := jsonMsg.Exists("value")
-	if !ok {
+	login := jsonMsg.GetString("login")
+	if login == "" {
 		log.Println("Error in visitor parse value don't exists")
 		return
 	}
-	value := jsonMsg.Get("value")
 
-	login := value.GetString("login")
-	if login == "" {
-		log.Println("Error in visitor parse login uncorrect")
-		return
-	}
-
-	pass := value.GetString("password")
+	pass := jsonMsg.GetString("pass")
 	if pass == "" {
 		log.Println("Error in visitor parse password uncorrect")
 		return
 	}
 
-	ok = database.CheckStaff(login, pass)
+	ok := database.CheckStaff(login, pass)
 	if !ok {
 		log.Println("Error uncorrect login or password")
 		return
@@ -39,5 +33,11 @@ func appendStaff(conn *websocket.Conn, msg string) {
 
 	staff[conn] = staffInfo{
 		login: login,
+	}
+}
+
+func staffProcessing(conn *websocket.Conn) {
+	for {
+		return
 	}
 }
