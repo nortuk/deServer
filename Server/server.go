@@ -15,6 +15,7 @@ type (
 	staffInfo struct {
 		id int
 		login string
+		tables []int
 	}
 
 	visitorInfo struct {
@@ -23,10 +24,7 @@ type (
 	}
 
 	tableInfo struct {
-		id int
 		name string
-		visitors map[*websocket.Conn]visitorInfo
-		staff map[*websocket.Conn]staffInfo
 	}
 
 	personType int
@@ -55,6 +53,7 @@ var (
 
 	staff = make(map[*websocket.Conn]staffInfo)
 	visitors = make(map[*websocket.Conn]visitorInfo)
+	tables = make(map[int]tableInfo)
 
 )
 

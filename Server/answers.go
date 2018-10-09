@@ -65,3 +65,56 @@ func sendAuthOk(conn *websocket.Conn) bool {
 
 	return true
 }
+
+func sendTables(conn *websocket.Conn) bool{
+	var tabs = []table {}
+	for id, tab := range tables {
+		tabs = append(tabs, table{
+			TableID: id,
+			Name: tab.name,
+		})
+	}
+
+	answer := response{
+		Command: "getTables",
+		Status: true,
+		Data: dataStruct{
+			"value":tabs,
+		},
+	}
+
+	jsonAnser, err := json.Marshal(answer)
+	if err != nil {
+		log.Println("ERROR in marshal response:", err)
+		return false
+	}
+
+	err = conn.WriteMessage(websocket.TextMessage,jsonAnser)
+	if err != nil {
+		log.Println("ERROR in sending message:", err)
+		return false
+	}
+
+	return true
+}
+
+func sendSetTablesOK(conn *websocket.Conn) bool {
+	answer := response{
+		Command: "setTables",
+		Status: true,
+	}
+
+	jsonAnser, err := json.Marshal(answer)
+	if err != nil {
+		log.Println("ERROR in marshal response:", err)
+		return false
+	}
+
+	err = conn.WriteMessage(websocket.TextMessage,jsonAnser)
+	if err != nil {
+		log.Println("ERROR in sending message:", err)
+		return false
+	}
+
+	return true
+}

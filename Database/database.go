@@ -75,3 +75,31 @@ func GetStaffId(login string, pass string) (id int, err error) {
 	}
 	return 0,errors.New("Error: can't find this user")
 }
+
+func GetTables() (tables map[int]string, err error) {
+	db, err := sql.Open(cfg.UsedDatabase, connStr)
+	if err != nil {
+		log.Println("Error in the open connection with database:", err)
+		return nil,err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT id, name FROM tables`)
+	if err != nil {
+		log.Println("Error in request execution:", err)
+		return nil,err
+	}
+	var id sql.NullInt64
+	var name sql.NullString
+	res := make(map[int]string)
+	for rows.Next() {
+		err = rows.Scan(&id,&name)
+		if err != nil {
+			log.Println("Error: in reading tables: ", err)
+			return nil, err
+		}
+		res[int(id.Int64)] = name.String
+	}
+
+	return res, nil
+}
