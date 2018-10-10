@@ -7,6 +7,7 @@ import (
 )
 
 func getPersonalType(msg string) (res personType) {
+	var parser = fastjson.Parser{}
 	jsonMsg, err := parser.Parse(msg)
 	if err != nil {
 		log.Println("Error in authentification parse ", err)

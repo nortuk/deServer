@@ -9,6 +9,7 @@ import (
 )
 
 func appendStaff(conn *websocket.Conn, msg string) {
+	var parser = fastjson.Parser{}
 	jsonMsg, err := parser.Parse(msg)
 	if err != nil {
 		log.Println("Error in visitor parse ", err)
@@ -56,11 +57,14 @@ func staffProcessing(conn *websocket.Conn) {
 
 		command := msg.GetString("command")
 		switch command {
-		case "getTables":
+		case "gettables":
 			getTables(conn)
 
-		case "setTables":
+		case "settables":
 			setTables(conn, msg)
+
+		case "getbusytables":
+			getBusyTables(conn)
 
 		default:
 			log.Println("Error: accept message with wrong structure")
@@ -72,26 +76,26 @@ func getTables(conn *websocket.Conn) {
 	if len(tables) == 0 {
 		err := updateTables()
 		if err != nil {
-			log.Println("Error in getTables: ", err)
-			sendError(conn,"getTables", err.Error())
+			log.Println("Error in gettables: ", err)
+			sendError(conn,"gettables", err.Error())
 			return
 		}
 	}
 
 	if !sendTables(conn) {
-		log.Println("Error in sendTables")
-		sendError(conn,"getTables","Error in sendTables")
+		log.Println("Error in sendtables")
+		sendError(conn,"gettables","Error in sendtables")
 	}
 }
 
 func updateTables() error {
 	sqlTables, err := database.GetTables()
 	if err != nil {
-		log.Println("Error in getTables: ", err)
+		log.Println("Error in gettables: ", err)
 		return err
 	}
 	for id,name := range sqlTables {
-		tables[id] = tableInfo{name, }
+		tables[id] = tableInfo{name, nil }
 	}
 	return nil
 }
@@ -100,16 +104,16 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 	if len(tables) == 0 {
 		err := updateTables()
 		if err != nil {
-			log.Println("Error in getTables: ", err)
-			sendError(conn,"setTables", err.Error())
+			log.Println("Error in gettables: ", err)
+			sendError(conn,"settables", err.Error())
 			return
 		}
 	}
 
 	tableNumbers,err := getTablesNumbers(msg)
 	if err != nil {
-		log.Println("Error in getTablesNumbers: ", err)
-		sendError(conn,"setTables", err.Error())
+		log.Println("Error in gettablesNumbers: ", err)
+		sendError(conn,"settables", err.Error())
 		return
 	}
 
@@ -121,14 +125,14 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 		_, ok := tables[num]
 		if !ok {
 			log.Println("Error number of table don't exists")
-			sendError(conn,"setTables", "Number of table don't exists")
+			sendError(conn,"settables", "Number of table don't exists")
 			return
 		}
 		personal.tables = append(personal.tables,num)
 	}
 
 	if !sendSetTablesOK(conn) {
-		log.Println("Error in sending ok command(setTables)")
+		log.Println("Error in sending ok command(settables)")
 	}
 }
 
@@ -153,4 +157,17 @@ func getTablesNumbers(msg *fastjson.Value) (val []int, err error) {
 	}
 
 	return val,err
+}
+
+func getBusyTables(conn *websocket.Conn) {
+	var busyTables []int
+	for id,info := range tables {
+		if len(info.visitors) != 0 {
+			busyTables = append(busyTables,id)
+		}
+	}
+
+	if !sendBusyTables(conn, busyTables) {
+		log.Println("Error in sending busy tables")
+	}
 }

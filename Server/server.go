@@ -25,6 +25,7 @@ type (
 
 	tableInfo struct {
 		name string
+		visitors map[*websocket.Conn]visitorInfo
 	}
 
 	personType int
@@ -39,8 +40,6 @@ const (
 
 
 var (
-	parser = fastjson.Parser{}
-
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -139,6 +138,7 @@ func listeningConnection(conn *websocket.Conn) {
 }
 
 func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
+	var parser = fastjson.Parser{}
 	msgType, msgBytes, err := conn.ReadMessage()
 	if(msgType == websocket.CloseMessage) {
 		log.Println("Connection closed")

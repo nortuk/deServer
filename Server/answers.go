@@ -75,8 +75,10 @@ func sendTables(conn *websocket.Conn) bool{
 		})
 	}
 
+	log.Println(tabs, tables)
+
 	answer := response{
-		Command: "getTables",
+		Command: "gettables",
 		Status: true,
 		Data: dataStruct{
 			"value":tabs,
@@ -100,8 +102,32 @@ func sendTables(conn *websocket.Conn) bool{
 
 func sendSetTablesOK(conn *websocket.Conn) bool {
 	answer := response{
+		Command: "settables",
+		Status: true,
+	}
+
+	jsonAnser, err := json.Marshal(answer)
+	if err != nil {
+		log.Println("ERROR in marshal response:", err)
+		return false
+	}
+
+	err = conn.WriteMessage(websocket.TextMessage,jsonAnser)
+	if err != nil {
+		log.Println("ERROR in sending message:", err)
+		return false
+	}
+
+	return true
+}
+
+func sendBusyTables(conn *websocket.Conn, busyTables []int) bool {
+	answer := response{
 		Command: "setTables",
 		Status: true,
+		Data: dataStruct{
+			"value": busyTables,
+		},
 	}
 
 	jsonAnser, err := json.Marshal(answer)

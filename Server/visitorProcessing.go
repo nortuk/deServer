@@ -7,6 +7,7 @@ import (
 )
 
 func appendVisitor(conn *websocket.Conn, msg string) {
+	var parser = fastjson.Parser{}
 	jsonMsg, err := parser.Parse(msg)
 	if err != nil {
 		log.Println("Error in visitor parse ", err)
