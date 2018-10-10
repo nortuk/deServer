@@ -2,7 +2,7 @@ package server
 
 import (
 	"log"
-	"svn.cloudserver.ru/fastJSON"
+	"../fastJSON"
 	"github.com/gorilla/websocket"
 )
 

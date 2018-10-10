@@ -4,33 +4,33 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"../Database"
-	"svn.cloudserver.ru/fastJSON"
+	"../fastJSON"
 	"errors"
 )
 
 func appendStaff(conn *websocket.Conn, msg string) {
 	jsonMsg, err := parser.Parse(msg)
 	if err != nil {
-		log.Println("Error in visitor parse ", err)
+		log.Println("Error in staff parse ", err)
 		return
 	}
 
 	ok := jsonMsg.Exists("data")
 	if !ok {
-		log.Println("Error in visitor parse value don't exists")
+		log.Println("Error in staff parse value don't exists")
 		return
 	}
 	data := jsonMsg.Get("data")
 
 	login := data.GetString("login")
 	if login == "" {
-		log.Println("Error in visitor parse value don't exists")
+		log.Println("Error in staff parse login don't exists")
 		return
 	}
 
 	pass := data.GetString("pass")
 	if pass == "" {
-		log.Println("Error in visitor parse password uncorrect")
+		log.Println("Error in staff parse password don't exists")
 		return
 	}
 
@@ -39,10 +39,9 @@ func appendStaff(conn *websocket.Conn, msg string) {
 		log.Println("Error uncorrect login or password ", err)
 		return
 	}
-
-	staff[conn] = staffInfo{
-		id: id,
-		login: login,
+	staff[conn] = StaffInfo{
+		Id: id,
+		Login: login,
 	}
 }
 
@@ -56,12 +55,14 @@ func staffProcessing(conn *websocket.Conn) {
 
 		command := msg.GetString("command")
 		switch command {
-		case "getTables":
+		case "gettables":
 			getTables(conn)
-
-		case "setTables":
+		case "settables":
 			setTables(conn, msg)
-
+		case "getmenu":
+			getMenu(conn)
+		case "gettableinfo":
+			getTableInfo(conn, msg)
 		default:
 			log.Println("Error: accept message with wrong structure")
 		}
@@ -90,13 +91,14 @@ func updateTables() error {
 		log.Println("Error in getTables: ", err)
 		return err
 	}
-	for id,name := range sqlTables {
+	for id, name := range sqlTables {
 		tables[id] = tableInfo{name, }
 	}
 	return nil
 }
 
 func setTables(conn *websocket.Conn, msg *fastjson.Value) {
+
 	if len(tables) == 0 {
 		err := updateTables()
 		if err != nil {
@@ -112,21 +114,21 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 		sendError(conn,"setTables", err.Error())
 		return
 	}
-
-	personal := staff[conn]
-	if len(personal.tables) != 0 {
-		personal.tables = personal.tables[:0]
+	var personal StaffInfo
+	personal = staff[conn]
+	if len(personal.Tables) != 0 {
+		personal.Tables = personal.Tables[:0]
 	}
-	for _,num := range tableNumbers {
+	for _, num := range tableNumbers {
 		_, ok := tables[num]
 		if !ok {
 			log.Println("Error number of table don't exists")
 			sendError(conn,"setTables", "Number of table don't exists")
 			return
 		}
-		personal.tables = append(personal.tables,num)
+		personal.Tables = append(personal.Tables,num)
 	}
-
+	staff[conn] = personal
 	if !sendSetTablesOK(conn) {
 		log.Println("Error in sending ok command(setTables)")
 	}

@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/gorilla/websocket"
 	"log"
-	"svn.cloudserver.ru/fastJSON"
+	"../fastJSON"
 )
 
 func appendVisitor(conn *websocket.Conn, msg string) {

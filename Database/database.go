@@ -11,21 +11,21 @@ import (
 )
 
 var (
-	cfg config.DBCfg
-	connStr string
-	ctx = context.Background()
+	Cfg     config.DBCfg
+	ConnStr string
+	ctx   = context.Background()
 )
 
 func InitializeDBWork(path string) (er error) {
 	var err error
-	cfg, err = config.LoadDBCfg(path)
+	Cfg, err = config.LoadDBCfg(path)
 	if err != nil {
 		log.Println("Error in initialize database work:", err)
 		return err
 	}
 
-	connStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable",
-		cfg.Host, cfg.Port, cfg.User, cfg.NameDatabase)
+	ConnStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable",
+		Cfg.Host, Cfg.Port, Cfg.User, Cfg.NameDatabase)
 
 	err = checkDBConnection()
 	if err != nil {
@@ -38,7 +38,7 @@ func InitializeDBWork(path string) (er error) {
 
 
 func checkDBConnection() (err error)  {
-	db, err := sql.Open(cfg.UsedDatabase, connStr)
+	db, err := sql.Open(Cfg.UsedDatabase, ConnStr)
 	if err != nil {
 		log.Println("Error in the open connection with database:", err)
 		return err
@@ -56,7 +56,7 @@ func checkDBConnection() (err error)  {
 
 
 func GetStaffId(login string, pass string) (id int, err error) {
-	db, err := sql.Open(cfg.UsedDatabase, connStr)
+	db, err := sql.Open(Cfg.UsedDatabase, ConnStr)
 	if err != nil {
 		log.Println("Error in the open connection with database:", err)
 		return 0, err
@@ -73,11 +73,11 @@ func GetStaffId(login string, pass string) (id int, err error) {
 		rows.Scan(&userID)
 		return int(userID.Int64), nil
 	}
-	return 0,errors.New("Error: can't find this user")
+	return 0, errors.New("Error: can't find this user")
 }
 
 func GetTables() (tables map[int]string, err error) {
-	db, err := sql.Open(cfg.UsedDatabase, connStr)
+	db, err := sql.Open(Cfg.UsedDatabase, ConnStr)
 	if err != nil {
 		log.Println("Error in the open connection with database:", err)
 		return nil,err
@@ -103,3 +103,4 @@ func GetTables() (tables map[int]string, err error) {
 
 	return res, nil
 }
+

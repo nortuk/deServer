@@ -26,7 +26,7 @@ func sendError(conn *websocket.Conn, command string, errMsg string) bool {
 		Command: command,
 		Status: false,
 		Data: dataStruct{
-			"value":errMsg,
+			"value": errMsg,
 		},
 	}
 
@@ -76,7 +76,7 @@ func sendTables(conn *websocket.Conn) bool{
 	}
 
 	answer := response{
-		Command: "getTables",
+		Command: "gettables",
 		Status: true,
 		Data: dataStruct{
 			"value":tabs,
@@ -100,7 +100,7 @@ func sendTables(conn *websocket.Conn) bool{
 
 func sendSetTablesOK(conn *websocket.Conn) bool {
 	answer := response{
-		Command: "setTables",
+		Command: "settables",
 		Status: true,
 	}
 

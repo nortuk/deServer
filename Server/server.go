@@ -7,15 +7,15 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"flag"
-	"svn.cloudserver.ru/fastJSON"
+	"../fastJSON"
 	"errors"
 )
 
 type (
-	staffInfo struct {
-		id int
-		login string
-		tables []int
+	StaffInfo struct {
+		Id int
+		Login string
+		Tables []int
 	}
 
 	visitorInfo struct {
@@ -51,7 +51,7 @@ var (
 
 	cfg config.ServCfg
 
-	staff = make(map[*websocket.Conn]staffInfo)
+	staff = make(map[*websocket.Conn]StaffInfo)
 	visitors = make(map[*websocket.Conn]visitorInfo)
 	tables = make(map[int]tableInfo)
 
@@ -98,6 +98,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func listeningConnection(conn *websocket.Conn) {
 	for {
+		//staffProcessing(conn)
 		msgType, msg, err := conn.ReadMessage()
 		if !checkCorrectMsg(msgType, err) {
 			return
@@ -149,12 +150,11 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 		msg,_ := parser.Parse("{}")
 		return msg, err
 	}
-
-	msg, parseErr := parser.Parse(string(msgBytes))
+	var p fastjson.Parser
+	msg, parseErr := p.Parse(string(msgBytes))
 	if parseErr != nil {
 		msg,_ := parser.Parse("{}")
 		return msg, nil
 	}
-
 	return msg, nil
 }
