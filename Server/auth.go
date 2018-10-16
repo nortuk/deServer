@@ -78,12 +78,19 @@ func staffAuth(msg *fastjson.Value, conn *websocket.Conn) bool {
 		}
 	}
 
+	mytables, err := getMyTablesFromDB(id)
+	if err != nil {
+		common.SendError(conn, common.CommandStaffAuth, common.ErrorDBProblem)
+		return false
+	}
+
 	common.StaffCon[conn] = common.StaffInfo{
 		Id:     id,
 		Login:  login,
 		Pass:   pass,
-		Tables: nil,
+		Tables: mytables,
 	}
+
 	_, ok = common.StaffCon[conn]
 	if !ok {
 		log.Println("Error in adding staff")
@@ -157,4 +164,32 @@ func sendStaffAuthOk(conn *websocket.Conn) {
 		log.Println("Error in sending message:", err)
 		return
 	}
+}
+
+func getMyTablesFromDB(id int) (res []int, err error) {
+	db, err := sql.Open(common.DBConfig.UsedDatabase, common.DBConnStr)
+	if err != nil {
+		log.Println("Error in the open connection with database:", err)
+		return nil,err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT id_table FROM staff_tables WHERE id_staff = $1`, id)
+	if err != nil {
+		log.Println("Error in request execution:", err)
+		return nil, err
+	}
+	res = []int{}
+	id = 0
+	for rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Println("Error: in reading my tables: ", err)
+			return nil, err
+		}
+		res = append(res, id)
+	}
+
+	return res,nil
+
 }

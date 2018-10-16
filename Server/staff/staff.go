@@ -22,10 +22,13 @@ func Processing(conn *websocket.Conn){
 			getTables(conn)
 
 		case common.CommandSettables:
-			//setTables(conn, msg)
+			setTables(conn, msg)
 
-		case "getbusytables":
-			//getBusyTables(conn)
+		case common.CommandGetMyTables:
+			getMyTables(conn)
+
+		case common.CommandGetBusyTables:
+			getBusyTables(conn)
 
 		default:
 			common.SendError(conn, command, common.ErrorUnknownCommandType)

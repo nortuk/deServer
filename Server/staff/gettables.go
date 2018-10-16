@@ -67,7 +67,7 @@ func updateTables() error {
 		return err
 	}
 	for id,name := range sqlTables {
-		common.Tables[id] = common.TableInfo{name}
+		common.Tables[id] = common.TableInfo{name, []string{}}
 	}
 	return nil
 }

@@ -31,5 +31,6 @@ type (
 
 	TableInfo struct {
 		Name string
+		Visitors []string
 	}
 )

@@ -4,6 +4,8 @@ const (
 	CommandStaffAuth string = "auth"
 	CommandGettables string = "gettables"
 	CommandSettables string = "settables"
+	CommandGetBusyTables string = "getbusytables"
+	CommandGetMyTables string = "getmytables"
 
 	CommandVisitorAuth string = "client-auth"
 )
