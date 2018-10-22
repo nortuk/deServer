@@ -30,6 +30,10 @@ func Processing(conn *websocket.Conn){
 		case common.CommandGetBusyTables:
 			getBusyTables(conn)
 
+		case common.CommandLogout:
+			logout(conn)
+			return
+
 		default:
 			common.SendError(conn, command, common.ErrorUnknownCommandType)
 			log.Println("Error: accept message with wrong structure")

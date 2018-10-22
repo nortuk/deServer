@@ -76,7 +76,6 @@ func listeningConnection(conn *websocket.Conn) {
 		case isStaffType:
 			if staffAuth(msg, conn) {
 				staff.Processing(conn)
-				return
 			}
 
 		case unknownType:

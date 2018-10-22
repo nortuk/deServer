@@ -6,6 +6,7 @@ const (
 	CommandSettables string = "settables"
 	CommandGetBusyTables string = "getbusytables"
 	CommandGetMyTables string = "getmytables"
+	CommandLogout string = "logout"
 
 	CommandVisitorAuth string = "client-auth"
 )
