@@ -78,6 +78,11 @@ func staffAuth(msg *fastjson.Value, conn *websocket.Conn) bool {
 		}
 	}
 
+	pers, ok := getStaffFromGap(id)
+	if ok {
+		common.StaffCon[conn] = pers
+	}
+
 	mytables, err := getMyTablesFromDB(id)
 	if err != nil {
 		common.SendError(conn, common.CommandStaffAuth, common.ErrorDBProblem)
@@ -87,7 +92,6 @@ func staffAuth(msg *fastjson.Value, conn *websocket.Conn) bool {
 	common.StaffCon[conn] = common.StaffInfo{
 		Id:     id,
 		Login:  login,
-		Pass:   pass,
 		Tables: mytables,
 	}
 
@@ -96,6 +100,12 @@ func staffAuth(msg *fastjson.Value, conn *websocket.Conn) bool {
 		log.Println("Error in adding staff")
 		common.SendError(conn, common.CommandStaffAuth, common.ErrorCannotAddStaff)
 		return false
+	}
+
+	for _, tableID := range common.StaffCon[conn].Tables{
+		tables := common.Tables[tableID]
+		tables.Staff[id] = id
+		common.Tables[tableID] = tables
 	}
 
 	sendStaffAuthOk(conn)
@@ -192,4 +202,14 @@ func getMyTablesFromDB(id int) (res []int, err error) {
 
 	return res,nil
 
+}
+
+func getStaffFromGap(id int) (pers common.StaffInfo, ok bool) {
+	for _, pers = range common.GapStaff {
+		if pers.Id == id {
+			return pers, true
+		}
+	}
+
+	return common.StaffInfo{}, false
 }

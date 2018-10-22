@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"./staff"
 	"./common"
+	"database/sql"
 )
 
 var (
@@ -39,11 +40,14 @@ func Start(servCfgPath string, dbCfgPath string) (err error) {
 }
 
 func listening() {
-	addr := flag.String("addr",
-		common.ServConfig.Ip+":"+ common.ServConfig.Port, "localhost")
+	err := loadTables()
+	if err != nil {
+		log.Fatal("Can't load tables from DB")
+	}
 
 	log.Println("Server started")
-
+	addr := flag.String("addr",
+		common.ServConfig.Ip+":"+ common.ServConfig.Port, "localhost")
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
@@ -75,7 +79,11 @@ func listeningConnection(conn *websocket.Conn) {
 
 		case isStaffType:
 			if staffAuth(msg, conn) {
-				staff.Processing(conn)
+				err := staff.Processing(conn)
+				if err != nil{
+					log.Println("Error in staff processing: ", err)
+					return
+				}
 			}
 
 		case unknownType:
@@ -110,4 +118,35 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	}
 
 	return msg, nil
+}
+
+func loadTables() error {
+	db, err := sql.Open(common.DBConfig.UsedDatabase, common.DBConnStr)
+	if err != nil {
+		log.Println("Error in the open connection with database:", err)
+		return err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT id, name FROM tables`)
+	if err != nil {
+		log.Println("Error in request execution:", err)
+		return err
+	}
+	var id sql.NullInt64
+	var name sql.NullString
+	for rows.Next() {
+		err = rows.Scan(&id,&name)
+		if err != nil {
+			log.Println("Error: in reading tables: ", err)
+			return err
+		}
+		common.Tables[int(id.Int64)] = common.TableInfo{
+			Name: name.String,
+			Visitors: []string{},
+			Staff: map[int]int{},
+		}
+	}
+
+	return nil
 }

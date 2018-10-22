@@ -1,6 +1,9 @@
 package common
 
-import "github.com/gorilla/websocket"
+import (
+	"github.com/gorilla/websocket"
+	"time"
+)
 
 var(
 	DBConfig  DbCfg
@@ -10,4 +13,5 @@ var(
 
 	StaffCon = make(map[*websocket.Conn]StaffInfo)
 	Tables = make(map[int]TableInfo)
+	GapStaff = make(map[time.Time]StaffInfo)
 )

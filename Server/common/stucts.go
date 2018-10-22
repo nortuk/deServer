@@ -25,12 +25,12 @@ type (
 	StaffInfo struct {
 		Id     int
 		Login  string
-		Pass   string
 		Tables []int
 	}
 
 	TableInfo struct {
 		Name string
 		Visitors []string
+		Staff map[int]int
 	}
 )

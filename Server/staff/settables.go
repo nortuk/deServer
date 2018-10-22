@@ -12,15 +12,6 @@ import (
 )
 
 func setTables(conn *websocket.Conn, msg *fastjson.Value) {
-	if len(common.Tables) == 0 {
-		err := updateTables()
-		if err != nil {
-			log.Println("Error in gettables: ", err)
-			common.SendError(conn, common.CommandSettables, common.ErrorDBProblem)
-			return
-		}
-	}
-
 	tableNumbers,err := getTablesNumbers(msg)
 	if err != nil {
 		log.Println("Error in gettablesNumbers: ", err)
@@ -51,6 +42,17 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 		return
 	}
 
+	for _, tableId := range oldTables {
+		tab := common.Tables[tableId]
+		delete(tab.Staff, personal.Id)
+		common.Tables[tableId]= tab
+	}
+
+	for _, tableID := range personal.Tables {
+		common.Tables[tableID].Staff[personal.Id] = personal.Id
+	}
+
+
 	if !sendSetTablesOK(conn) {
 		log.Println("Error in sending ok command(settables)")
 	}
@@ -58,7 +60,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 
 func sendSetTablesOK(conn *websocket.Conn) bool {
 	answer := common.Response{
-		Command: "gettables",
+		Command: "settables",
 		Status: true,
 		Data: nil,
 	}

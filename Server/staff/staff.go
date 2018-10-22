@@ -6,14 +6,16 @@ import (
 	"svn.cloudserver.ru/fastJSON"
 	"errors"
 	"../common"
+	"time"
 )
 
-func Processing(conn *websocket.Conn){
+func Processing(conn *websocket.Conn) error {
 	for {
 		msg, err := getMsg(conn)
 		if err != nil {
 			log.Println("Error in staff processing ", err)
-			return
+			gapConn(conn)
+			return err
 		}
 
 		command := msg.GetString("command")
@@ -32,7 +34,7 @@ func Processing(conn *websocket.Conn){
 
 		case common.CommandLogout:
 			logout(conn)
-			return
+			return nil
 
 		default:
 			common.SendError(conn, command, common.ErrorUnknownCommandType)
@@ -45,17 +47,9 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	var parser = fastjson.Parser{}
 	msgType, msgBytes, err := conn.ReadMessage()
 	log.Println("Accept message:", string(msgBytes))
-	if msgType == websocket.CloseMessage {
-		//вызов функции при разрыве
-		log.Println("Close message")
+	if (msgType == websocket.CloseMessage) || (err != nil) {
 		msg, _ := parser.Parse("{}")
 		return msg, errors.New("Connection closed")
-	}
-	if err != nil {
-		//вызов функции при разрыве
-		log.Println("Error in get msg:", err)
-		msg, _ := parser.Parse("{}")
-		return msg, err
 	}
 
 	msg, parseErr := parser.Parse(string(msgBytes))
@@ -65,4 +59,10 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	}
 
 	return msg, nil
+}
+
+func gapConn(conn *websocket.Conn) {
+	pers := common.StaffCon[conn]
+	common.GapStaff[time.Now()] = pers
+	delete(common.StaffCon, conn)
 }
