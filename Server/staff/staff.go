@@ -6,7 +6,6 @@ import (
 	"svn.cloudserver.ru/fastJSON"
 	"errors"
 	"../common"
-	"time"
 )
 
 func Processing(conn *websocket.Conn) error {
@@ -14,11 +13,18 @@ func Processing(conn *websocket.Conn) error {
 		msg, err := getMsg(conn)
 		if err != nil {
 			log.Println("Error in staff processing ", err)
-			gapConn(conn)
 			return err
 		}
 
 		command := msg.GetString("command")
+
+		_, ok := common.StaffCon[conn]
+		if !ok {
+			log.Println("Connection close!")
+			common.SendError(conn, command, common.ErrorConnectionrefused)
+			return nil
+		}
+
 		switch command {
 		case common.CommandGettables:
 			getTables(conn)
@@ -47,7 +53,7 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	var parser = fastjson.Parser{}
 	msgType, msgBytes, err := conn.ReadMessage()
 	log.Println("Accept message:", string(msgBytes))
-	if (msgType == websocket.CloseMessage) || (err != nil) {
+	if (msgType != websocket.TextMessage) || (err != nil) {
 		msg, _ := parser.Parse("{}")
 		return msg, errors.New("Connection closed")
 	}
@@ -59,10 +65,4 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	}
 
 	return msg, nil
-}
-
-func gapConn(conn *websocket.Conn) {
-	pers := common.StaffCon[conn]
-	common.GapStaff[time.Now()] = pers
-	delete(common.StaffCon, conn)
 }

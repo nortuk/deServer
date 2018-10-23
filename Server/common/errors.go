@@ -16,6 +16,7 @@ const (
 	ErrorDBProblem             errCode = 104
 	ErrorCannotAddStaff        errCode = 105
 	ErrorTableDoesnotExists    errCode = 106
+	ErrorConnectionrefused 	   errCode = 107
 )
 
 func SendError(conn *websocket.Conn, command string, errorCode errCode) {

@@ -78,9 +78,13 @@ func staffAuth(msg *fastjson.Value, conn *websocket.Conn) bool {
 		}
 	}
 
-	pers, ok := getStaffFromGap(id)
+	oldConn, ok := getFromStaff(id)
 	if ok {
+		pers := common.StaffCon[oldConn]
+		delete(common.StaffCon, oldConn)
 		common.StaffCon[conn] = pers
+		sendStaffAuthOk(conn)
+		return true
 	}
 
 	mytables, err := getMyTablesFromDB(id)
@@ -204,12 +208,12 @@ func getMyTablesFromDB(id int) (res []int, err error) {
 
 }
 
-func getStaffFromGap(id int) (pers common.StaffInfo, ok bool) {
-	for _, pers = range common.GapStaff {
+func getFromStaff(id int) (conn *websocket.Conn, ok bool) {
+	for conn, pers := range common.StaffCon {
 		if pers.Id == id {
-			return pers, true
+			return conn, true
 		}
 	}
 
-	return common.StaffInfo{}, false
+	return nil, false
 }
