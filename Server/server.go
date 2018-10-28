@@ -25,12 +25,13 @@ var (
 func Start(servCfgPath string, dbCfgPath string) (err error) {
 	err = initializeDBWork(dbCfgPath)
 	if err != nil {
-		log.Println("EROR(Server start): database initialization: ", err)
+		log.Println("EROR in server start: database initialization: ", err)
 		return err
 	}
 
 	common.ServConfig, err = loadServCfg(servCfgPath)
 	if err != nil {
+		log.Println("ERROR in loading server config: ", err)
 		return err
 	}
 
@@ -42,20 +43,21 @@ func Start(servCfgPath string, dbCfgPath string) (err error) {
 func listening() {
 	err := loadTables()
 	if err != nil {
-		log.Fatal("Can't load tables from DB")
+		log.Fatal("ERROR in loading tables from DB", err)
 	}
 
-	log.Println("Server started")
+	log.Println("Server started (" + common.ServConfig.Ip + ":" + common.ServConfig.Port + ")")
+	http.HandleFunc("/", handler)
 	addr := flag.String("addr",
 		common.ServConfig.Ip+":"+ common.ServConfig.Port, "localhost")
-	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	//из http запроса переходим в websocket соединение
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Upgrade error", err)
+		log.Println("Error in upgrading http response from " + r.RemoteAddr + " : ", err)
 		return
 	}
 
@@ -66,7 +68,7 @@ func listeningConnection(conn *websocket.Conn) {
 	for {
 		msg, err := getMsg(conn)
 		if err != nil {
-			log.Println("Error in geting message: ", err)
+			log.Println("[" + conn.RemoteAddr().String() + "]Error in geting message: ", err)
 			common.SendError(conn, "", common.ErrorUnknownMsg)
 			return
 		}
@@ -78,12 +80,10 @@ func listeningConnection(conn *websocket.Conn) {
 			return
 
 		case isStaffType:
-			if staffAuth(msg, conn) {
-				err := staff.Processing(conn)
-				if err != nil{
-					log.Println("Error in staff processing: ", err)
-					return
-				}
+			err := staff.Processing(msg, conn)
+			if err != nil{
+				log.Println("[" + conn.RemoteAddr().String() +"]Error in staff processing: ", err)
+				return
 			}
 
 		case unknownType:
@@ -97,16 +97,14 @@ func listeningConnection(conn *websocket.Conn) {
 func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	var parser = fastjson.Parser{}
 	msgType, msgBytes, err := conn.ReadMessage()
-	log.Println("Accept message:", string(msgBytes))
+	log.Println("[" + conn.RemoteAddr().String() + "]Accept message: ", string(msgBytes))
 	if msgType == websocket.CloseMessage {
-		//вызов функции при разрыве
-		log.Println("Close message")
+		log.Println("----[" + conn.RemoteAddr().String() + "]WebSocket close message" )
 		msg, _ := parser.Parse("{}")
 		return msg, errors.New("Connection closed")
 	}
 	if err != nil {
-		//вызов функции при разрыве
-		log.Println("Error in get msg:", err)
+		log.Println("----[" + conn.RemoteAddr().String() +  "]Error in get msg:", err)
 		msg, _ := parser.Parse("{}")
 		return msg, err
 	}

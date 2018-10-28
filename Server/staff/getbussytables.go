@@ -16,7 +16,7 @@ func getBusyTables(conn *websocket.Conn) {
 	}
 
 	if !sendBusyTables(conn, busyTables) {
-		log.Println("Error in sending busy tables")
+		log.Println("[" + conn.RemoteAddr().String() +"]Error in sending busy tables")
 	}
 }
 
@@ -31,13 +31,13 @@ func sendBusyTables(conn *websocket.Conn, busyTables []int) bool {
 
 	jsonAnswer, err := json.Marshal(answer)
 	if err != nil {
-		log.Println("ERROR in marshal response:", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in marshal response:", err)
 		return false
 	}
 
 	err = conn.WriteMessage(websocket.TextMessage,jsonAnswer)
 	if err != nil {
-		log.Println("ERROR in sending message:", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in sending message:", err)
 		return false
 	}
 

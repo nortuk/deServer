@@ -3,16 +3,21 @@ package staff
 import (
 	"github.com/gorilla/websocket"
 	"log"
-	"svn.cloudserver.ru/fastJSON"
+	"../../fastJSON"
 	"errors"
 	"../common"
 )
 
-func Processing(conn *websocket.Conn) error {
+func Processing(msg *fastjson.Value,conn *websocket.Conn) error {
+	err := auth(msg, conn)
+	if err != nil {
+		log.Println("[" + conn.RemoteAddr().String() + "]Error in authentification: ", err)
+		return err
+	}
+
 	for {
 		msg, err := getMsg(conn)
 		if err != nil {
-			log.Println("Error in staff processing ", err)
 			return err
 		}
 
@@ -20,7 +25,7 @@ func Processing(conn *websocket.Conn) error {
 
 		_, ok := common.StaffCon[conn]
 		if !ok {
-			log.Println("Connection close!")
+			log.Println("[" + conn.RemoteAddr().String() +"]Connection close!")
 			common.SendError(conn, command, common.ErrorConnectionrefused)
 			return nil
 		}
@@ -40,11 +45,12 @@ func Processing(conn *websocket.Conn) error {
 
 		case common.CommandLogout:
 			logout(conn)
+			log.Println("[" + conn.RemoteAddr().String() +"]Logout")
 			return nil
 
 		default:
 			common.SendError(conn, command, common.ErrorUnknownCommandType)
-			log.Println("Error: accept message with wrong structure")
+			log.Println("[" + conn.RemoteAddr().String() +"]Error: accept message with wrong structure")
 		}
 	}
 }
@@ -52,7 +58,7 @@ func Processing(conn *websocket.Conn) error {
 func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	var parser = fastjson.Parser{}
 	msgType, msgBytes, err := conn.ReadMessage()
-	log.Println("Accept message:", string(msgBytes))
+	log.Println("[" + conn.RemoteAddr().String() +"]Accept message:", string(msgBytes))
 	if (msgType != websocket.TextMessage) || (err != nil) {
 		msg, _ := parser.Parse("{}")
 		return msg, errors.New("Connection closed")

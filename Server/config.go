@@ -10,7 +10,7 @@ import (
 func loadServCfg(path string) (cfg common.ServCfg, err error) {
 	configFile, err := os.Open(path)
 	if err != nil {
-		log.Println("Error in the open of config server file:", err)
+		log.Println("ERROR in the open of config server file:", err)
 		return cfg, err
 	}
 	jsonParser := json.NewDecoder(configFile)
@@ -21,7 +21,7 @@ func loadServCfg(path string) (cfg common.ServCfg, err error) {
 func loadDBCfg(path string) (cfg common.DbCfg, err error) {
 	configFile, err := os.Open(path)
 	if err != nil {
-		log.Println("Error in the open of config database file:", err)
+		log.Println("ERROR in the open of config database file:", err)
 		return cfg, err
 	}
 	jsonParser := json.NewDecoder(configFile)

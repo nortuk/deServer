@@ -2,7 +2,7 @@ package staff
 
 import (
 	"github.com/gorilla/websocket"
-	"svn.cloudserver.ru/fastJSON"
+	"../../fastJSON"
 	"log"
 	"../common"
 	"errors"
@@ -14,7 +14,7 @@ import (
 func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 	tableNumbers,err := getTablesNumbers(msg)
 	if err != nil {
-		log.Println("Error in gettablesNumbers: ", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]Error in gettablesNumbers: ", err)
 		common.SendError(conn,common.CommandSettables, common.ErrorWrongCommandStructure)
 		return
 	}
@@ -27,7 +27,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 	for _,num := range tableNumbers {
 		_, ok := common.Tables[num]
 		if !ok {
-			log.Println("Error number of table don't exists")
+			log.Println("[" + conn.RemoteAddr().String() +"]Error: number of table doesn't exists")
 			common.SendError(conn,common.CommandSettables, common.ErrorTableDoesnotExists)
 			personal.Tables = oldTables
 			return
@@ -36,7 +36,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 	}
 
 	if !setTablesInDB(personal) {
-		log.Println("Error in append table in DB")
+		log.Println("[" + conn.RemoteAddr().String() +"]Error in append table in DB")
 		common.SendError(conn,common.CommandSettables, common.ErrorDBProblem)
 		personal.Tables = oldTables
 		return
@@ -54,7 +54,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 
 
 	if !sendSetTablesOK(conn) {
-		log.Println("Error in sending ok command(settables)")
+		log.Println("[" + conn.RemoteAddr().String() +"]Error in sending ok command(settables)")
 	}
 }
 
@@ -67,13 +67,13 @@ func sendSetTablesOK(conn *websocket.Conn) bool {
 
 	jsonAnser, err := json.Marshal(answer)
 	if err != nil {
-		log.Println("ERROR in marshal response:", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in marshal response:", err)
 		return false
 	}
 
 	err = conn.WriteMessage(websocket.TextMessage,jsonAnser)
 	if err != nil {
-		log.Println("ERROR in sending message:", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in sending message:", err)
 		return false
 	}
 
@@ -113,20 +113,17 @@ func setTablesInDB(personal common.StaffInfo) bool {
 
 	db, err := sql.Open(common.DBConfig.UsedDatabase, common.DBConnStr)
 	if err != nil {
-		log.Println("Error in the open connection with database:", err)
 		return false
 	}
 	defer db.Close()
 
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		log.Println("Error in creating query:", err)
 		return false
 	}
 
 	_, err = stmt.Exec()
 	if err != nil {
-		log.Println("Error in executing query:", err)
 		return false
 	}
 

@@ -20,13 +20,13 @@ func getMyTables(conn *websocket.Conn)  {
 
 	jsonAnser, err := json.Marshal(answer)
 	if err != nil {
-		log.Println("ERROR in marshal response:", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in marshal response:", err)
 		return
 	}
 
 	err = conn.WriteMessage(websocket.TextMessage,jsonAnser)
 	if err != nil {
-		log.Println("ERROR in sending message:", err)
+		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in sending message:", err)
 		return
 	}
 

@@ -14,7 +14,7 @@ type table struct {
 
 func getTables(conn *websocket.Conn) {
 	if !sendTables(conn) {
-	log.Println("Error in sendtables")
+		log.Println("[" + conn.RemoteAddr().String() +"]Error in sendtables")
 	}
 }
 
@@ -37,13 +37,13 @@ func sendTables(conn *websocket.Conn) bool{
 
 	jsonAnser, err := json.Marshal(answer)
 	if err != nil {
-		log.Println("ERROR in marshal response:", err)
+		log.Println("----[" + conn.RemoteAddr().String() +"]ERROR in marshal response:", err)
 		return false
 	}
 
 	err = conn.WriteMessage(websocket.TextMessage,jsonAnser)
 	if err != nil {
-		log.Println("ERROR in sending message:", err)
+		log.Println("----[" + conn.RemoteAddr().String() +"]ERROR in sending message:", err)
 		return false
 	}
 
