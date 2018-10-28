@@ -12,4 +12,6 @@ var(
 
 	StaffCon = make(map[*websocket.Conn]StaffInfo)
 	Tables = make(map[int]TableInfo)
+
+	Menu = []MenuCategory{}
 )

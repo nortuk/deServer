@@ -43,6 +43,9 @@ func Processing(msg *fastjson.Value,conn *websocket.Conn) error {
 		case common.CommandGetBusyTables:
 			getBusyTables(conn)
 
+		case common.CommandGetmenu:
+			getMenu(conn)
+
 		case common.CommandLogout:
 			logout(conn)
 			log.Println("[" + conn.RemoteAddr().String() +"]Logout")

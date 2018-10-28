@@ -7,6 +7,7 @@ const (
 	CommandGetBusyTables string = "getbusytables"
 	CommandGetMyTables string = "getmytables"
 	CommandLogout string = "logout"
+	CommandGetmenu string = "getmenu"
 
 	CommandVisitorAuth string = "client-auth"
 )

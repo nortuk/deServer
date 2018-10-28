@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"./staff"
 	"./common"
-	"database/sql"
 )
 
 var (
@@ -44,6 +43,10 @@ func listening() {
 	err := loadTables()
 	if err != nil {
 		log.Fatal("ERROR in loading tables from DB", err)
+	}
+	err = loadMenu()
+	if err != nil {
+		log.Fatal("ERROR in loading menu from DB", err)
 	}
 
 	log.Println("Server started (" + common.ServConfig.Ip + ":" + common.ServConfig.Port + ")")
@@ -116,35 +119,4 @@ func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {
 	}
 
 	return msg, nil
-}
-
-func loadTables() error {
-	db, err := sql.Open(common.DBConfig.UsedDatabase, common.DBConnStr)
-	if err != nil {
-		log.Println("Error in the open connection with database:", err)
-		return err
-	}
-	defer db.Close()
-
-	rows, err := db.Query(`SELECT id, name FROM tables`)
-	if err != nil {
-		log.Println("Error in request execution:", err)
-		return err
-	}
-	var id sql.NullInt64
-	var name sql.NullString
-	for rows.Next() {
-		err = rows.Scan(&id,&name)
-		if err != nil {
-			log.Println("Error: in reading tables: ", err)
-			return err
-		}
-		common.Tables[int(id.Int64)] = common.TableInfo{
-			Name: name.String,
-			Visitors: []string{},
-			Staff: map[int]int{},
-		}
-	}
-
-	return nil
 }

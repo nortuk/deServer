@@ -33,4 +33,15 @@ type (
 		Visitors []string
 		Staff map[int]int
 	}
+
+	MenuCategory struct {
+		Name 	string 		`json:"nameofcategory"`
+		Goods 	[]MenuGood		`json:"goods"`
+	}
+
+	MenuGood struct {
+		Id 		int 	`json:"id"`
+		Name	string 	`json:"name"`
+		Price 	int		`json:"price"`
+	}
 )
