@@ -14,7 +14,7 @@ const (
 	ErrorWrongCommandStructure errCode = 102
 	ErrorWrongUser             errCode = 103
 	ErrorDBProblem             errCode = 104
-	ErrorCannotAddStaff        errCode = 105
+	ErrorProductDontExists     errCode = 105
 	ErrorTableDoesnotExists    errCode = 106
 	ErrorConnectionrefused 	   errCode = 107
 )

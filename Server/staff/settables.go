@@ -60,7 +60,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 
 func sendSetTablesOK(conn *websocket.Conn) bool {
 	answer := common.Response{
-		Command: "settables",
+		Command: common.CommandSettables,
 		Status: true,
 		Data: nil,
 	}

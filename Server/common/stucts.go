@@ -32,6 +32,7 @@ type (
 		Name string
 		Visitors []string
 		Staff map[int]int
+		Order []SubOrder
 	}
 
 	MenuCategory struct {
@@ -43,5 +44,10 @@ type (
 		Id 		int 	`json:"id"`
 		Name	string 	`json:"name"`
 		Price 	int		`json:"price"`
+	}
+
+	SubOrder struct {
+		ProductID int	`json:"id"`
+		Count 	int 	`json:"count"`
 	}
 )

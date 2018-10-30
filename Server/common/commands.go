@@ -8,6 +8,8 @@ const (
 	CommandGetMyTables string = "getmytables"
 	CommandLogout string = "logout"
 	CommandGetmenu string = "getmenu"
+	CommandSetmenu string = "setmenu"
+	CommandGetTableInfo string = "gettableinfo"
 
 	CommandVisitorAuth string = "client-auth"
 )
