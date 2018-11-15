@@ -8,7 +8,9 @@ import (
 )
 
 func getMyTables(conn *websocket.Conn)  {
-	personal := common.StaffCon[conn]
+	common.StaffConnMutex.Lock()
+	personal := common.StaffConn[conn]
+	common.StaffConnMutex.Unlock()
 
 	answer := common.Response{
 		Command: "gettables",

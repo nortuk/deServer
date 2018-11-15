@@ -23,7 +23,9 @@ func Processing(msg *fastjson.Value, conn *websocket.Conn) error {
 
 		command := msg.GetString("command")
 
+		common.VisitorsConnMutex.Lock()
 		_, ok := common.VisitorsConn[conn]
+		common.VisitorsConnMutex.Unlock()
 		if !ok {
 			log.Println("[" + conn.RemoteAddr().String() +"]Connection close!")
 			common.SendError(conn, command, common.ErrorConnectionrefused)
@@ -33,8 +35,6 @@ func Processing(msg *fastjson.Value, conn *websocket.Conn) error {
 		switch command {
 		case common.CommandGetmenu:
 			getMenu(conn)
-
-
 
 		default:
 			common.SendError(conn, command, common.ErrorUnknownCommandType)

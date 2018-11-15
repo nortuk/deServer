@@ -20,12 +20,14 @@ func getTables(conn *websocket.Conn) {
 
 func sendTables(conn *websocket.Conn) bool{
 	var tabs []table
+	common.TablesMutex.Lock()
 	for id, tab := range common.Tables {
 		tabs = append(tabs, table{
 			TableID: id,
 			Name: tab.Name,
 		})
 	}
+	common.TablesMutex.Unlock()
 
 	answer := common.Response{
 		Command: "gettables",

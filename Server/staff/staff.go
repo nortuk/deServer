@@ -23,7 +23,9 @@ func Processing(msg *fastjson.Value,conn *websocket.Conn) error {
 
 		command := msg.GetString("command")
 
-		_, ok := common.StaffCon[conn]
+		common.StaffConnMutex.Lock()
+		_, ok := common.StaffConn[conn]
+		common.StaffConnMutex.Unlock()
 		if !ok {
 			log.Println("[" + conn.RemoteAddr().String() +"]Connection close!")
 			common.SendError(conn, command, common.ErrorConnectionrefused)

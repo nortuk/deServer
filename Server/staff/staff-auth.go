@@ -18,15 +18,18 @@ func auth(msg *fastjson.Value, conn *websocket.Conn) error {
 	}
 
 	//поиск в уже заходивших
+	common.StaffConnMutex.Lock()
 	oldConn, ok := getFromStaff(id)
 	if ok {
-		pers := common.StaffCon[oldConn]
-		delete(common.StaffCon, oldConn)
-		common.StaffCon[conn] = pers
+		pers := common.StaffConn[oldConn]
+		delete(common.StaffConn, oldConn)
+		common.StaffConn[conn] = pers
+		common.StaffConnMutex.Unlock()
 		sendStaffAuthOk(conn)
 		log.Println("----[" + conn.RemoteAddr().String() + "] Login as " + login)
 		return nil
 	}
+	common.StaffConnMutex.Unlock()
 
 	mytables, err := getMyTablesFromDB(id)
 	if err != nil {
@@ -107,17 +110,21 @@ func getStaffId(login string, pass string) (id int, err error) {
 }
 
 func addUserInOnline(conn *websocket.Conn, id int, login string, mytables []int) error {
-	common.StaffCon[conn] = common.StaffInfo{
+	common.StaffConnMutex.Lock()
+	common.StaffConn[conn] = common.StaffInfo{
 		Id:     id,
 		Login:  login,
 		Tables: mytables,
 	}
 
-	for _, tableID := range common.StaffCon[conn].Tables{
+	common.TablesMutex.Lock()
+	for _, tableID := range common.StaffConn[conn].Tables{
 		tables := common.Tables[tableID]
 		tables.Staff[id] = id
 		common.Tables[tableID] = tables
 	}
+	common.TablesMutex.Unlock()
+	common.StaffConnMutex.Unlock()
 
 	return sendStaffAuthOk(conn)
 }
@@ -169,7 +176,7 @@ func getMyTablesFromDB(id int) (res []int, err error) {
 }
 
 func getFromStaff(id int) (conn *websocket.Conn, ok bool) {
-	for conn, pers := range common.StaffCon {
+	for conn, pers := range common.StaffConn {
 		if pers.Id == id {
 			return conn, true
 		}

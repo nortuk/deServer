@@ -9,11 +9,13 @@ import (
 
 func getBusyTables(conn *websocket.Conn) {
 	var busyTables []int
+	common.TablesMutex.Lock()
 	for id,info := range common.Tables {
 		if len(info.Visitors) != 0 {
 			busyTables = append(busyTables,id)
 		}
 	}
+	common.TablesMutex.Unlock()
 
 	if !sendBusyTables(conn, busyTables) {
 		log.Println("[" + conn.RemoteAddr().String() +"]Error in sending busy tables")

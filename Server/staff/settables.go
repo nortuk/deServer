@@ -19,13 +19,17 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 		return
 	}
 
-	personal := common.StaffCon[conn]
+	common.StaffConnMutex.Lock()
+	personal := common.StaffConn[conn]
+	common.StaffConnMutex.Unlock()
 	oldTables := personal.Tables
 	if len(personal.Tables) != 0 {
 		personal.Tables = personal.Tables[:0]
 	}
 	for _,num := range tableNumbers {
+		common.TablesMutex.Lock()
 		_, ok := common.Tables[num]
+		common.TablesMutex.Unlock()
 		if !ok {
 			log.Println("[" + conn.RemoteAddr().String() +"]Error: number of table doesn't exists")
 			common.SendError(conn,common.CommandSettables, common.ErrorTableDoesnotExists)
@@ -42,6 +46,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 		return
 	}
 
+	common.TablesMutex.Lock()
 	for _, tableId := range oldTables {
 		tab := common.Tables[tableId]
 		delete(tab.Staff, personal.Id)
@@ -51,6 +56,7 @@ func setTables(conn *websocket.Conn, msg *fastjson.Value) {
 	for _, tableID := range personal.Tables {
 		common.Tables[tableID].Staff[personal.Id] = personal.Id
 	}
+	common.TablesMutex.Unlock()
 
 
 	if !sendSetTablesOK(conn) {

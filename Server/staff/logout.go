@@ -8,7 +8,9 @@ import (
 )
 
 func logout(conn *websocket.Conn) {
-	personal := common.StaffCon[conn]
+	common.StaffConnMutex.Lock()
+	common.TablesMutex.Lock()
+	personal := common.StaffConn[conn]
 
 	for _, tableId := range personal.Tables {
 		tab := common.Tables[tableId]
@@ -16,7 +18,9 @@ func logout(conn *websocket.Conn) {
 		common.Tables[tableId] = tab
 	}
 
-	delete(common.StaffCon, conn)
+	delete(common.StaffConn, conn)
+	common.TablesMutex.Unlock()
+	common.StaffConnMutex.Unlock()
 
 	if !sendLogoutOK(conn) {
 		log.Println("[" + conn.RemoteAddr().String() +"]Error in sending ok command(settables)")

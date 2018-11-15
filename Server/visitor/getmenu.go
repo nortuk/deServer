@@ -9,8 +9,8 @@ import (
 
 func getMenu(conn *websocket.Conn) {
 	answer := common.Response{
-		Command: "getmenu",
-		Status: true,
+		Command: common.CommandGetmenu,
+		Status:  true,
 		Data: common.DataStruct{
 			"value": common.Menu,
 		},
@@ -18,13 +18,13 @@ func getMenu(conn *websocket.Conn) {
 
 	jsonAnswer, err := json.Marshal(answer)
 	if err != nil {
-		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in marshal response:", err)
+		log.Println("["+conn.RemoteAddr().String()+"]ERROR in marshal response:", err)
 		return
 	}
 
-	err = conn.WriteMessage(websocket.TextMessage,jsonAnswer)
+	err = conn.WriteMessage(websocket.TextMessage, jsonAnswer)
 	if err != nil {
-		log.Println("[" + conn.RemoteAddr().String() +"]ERROR in sending message:", err)
+		log.Println("["+conn.RemoteAddr().String()+"]ERROR in sending message:", err)
 		return
 	}
 
