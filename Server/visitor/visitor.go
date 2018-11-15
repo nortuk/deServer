@@ -1,17 +1,17 @@
-package staff
+package visitor
 
 import (
+	"../../fastJSON"
 	"github.com/gorilla/websocket"
 	"log"
-	"../../fastJSON"
 	"errors"
 	"../common"
 )
 
-func Processing(msg *fastjson.Value,conn *websocket.Conn) error {
+func Processing(msg *fastjson.Value, conn *websocket.Conn) error {
 	err := auth(msg, conn)
 	if err != nil {
-		log.Println("[" + conn.RemoteAddr().String() + "]Error in authentification: ", err)
+		log.Println("[" + conn.RemoteAddr().String() + "]Error in visitor authentification: ", err)
 		return nil
 	}
 
@@ -23,7 +23,7 @@ func Processing(msg *fastjson.Value,conn *websocket.Conn) error {
 
 		command := msg.GetString("command")
 
-		_, ok := common.StaffCon[conn]
+		_, ok := common.VisitorsConn[conn]
 		if !ok {
 			log.Println("[" + conn.RemoteAddr().String() +"]Connection close!")
 			common.SendError(conn, command, common.ErrorConnectionrefused)
@@ -31,37 +31,18 @@ func Processing(msg *fastjson.Value,conn *websocket.Conn) error {
 		}
 
 		switch command {
-		case common.CommandGettables:
-			getTables(conn)
-
-		case common.CommandSettables:
-			setTables(conn, msg)
-
-		case common.CommandGetMyTables:
-			getMyTables(conn)
-
-		case common.CommandGetBusyTables:
-			getBusyTables(conn)
-
 		case common.CommandGetmenu:
 			getMenu(conn)
 
-		case common.CommandSetmenu:
-			setmenu(msg,conn)
 
-		case common.CommandGetTableInfo:
-			gettableinfo(msg, conn)
-
-		case common.CommandLogout:
-			logout(conn)
-			log.Println("[" + conn.RemoteAddr().String() +"]Logout")
-			return nil
 
 		default:
 			common.SendError(conn, command, common.ErrorUnknownCommandType)
 			log.Println("[" + conn.RemoteAddr().String() +"]Error: accept message with wrong structure")
 		}
 	}
+
+	return nil
 }
 
 func getMsg(conn *websocket.Conn) (msg *fastjson.Value, err error) {

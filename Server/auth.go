@@ -41,12 +41,12 @@ func isStaff(jsonMsg *fastjson.Value) bool {
 }
 
 func isVisitor(jsonMsg *fastjson.Value) bool {
-	ok := jsonMsg.Exists("type")
+	ok := jsonMsg.Exists("command")
 	if !ok {
 		return false
 	}
 
-	if jsonMsg.GetString("type") == common.CommandVisitorAuth {
+	if jsonMsg.GetString("command") == common.CommandVisitorAuth {
 		return true
 	}
 

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"./staff"
 	"./common"
+	"./visitor"
 )
 
 var (
@@ -80,7 +81,11 @@ func listeningConnection(conn *websocket.Conn) {
 
 		switch conType {
 		case isVisitorType:
-			return
+			err := visitor.Processing(msg, conn)
+			if err != nil {
+				log.Println("[" + conn.RemoteAddr().String() +"]Error in visitor processing: ", err)
+				return
+			}
 
 		case isStaffType:
 			err := staff.Processing(msg, conn)

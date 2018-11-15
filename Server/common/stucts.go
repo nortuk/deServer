@@ -28,6 +28,11 @@ type (
 		Tables []int
 	}
 
+	VisitorInfo struct {
+		IMEI	string
+		TableID	int
+	}
+
 	TableInfo struct {
 		Name string
 		Visitors []string
